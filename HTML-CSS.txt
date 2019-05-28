@@ -27,6 +27,7 @@ spécificité du ciblage des éléments => quelle valeur de propriété sera prioritai
 p ::	(élément et pseudo-élément)	 	=> 0.1 pt
 *	(tous les éléments)			=> 0 pt
 
+height: 100vh;		100% du Viewport Height = vue affichée à l'écran
 
 
 
@@ -77,7 +78,14 @@ flex:
 	none;		les éléments enfants n'ont pas leur taille redéfinie lorsque l'élément parent se réduit ou s'agrandit
 	auto;		ils s'agrandissent et rétrécissent en fonction de la taille de leur parent
 			
+position:
+	absolute;
+	...
+	relative;
+=>	sticky;		position "normale" dans le flux tant qu'il est visible, puis devient fixed lorsque qu'il disparait pour rester afficher à l'écran en permanance
 
+position:   ;
+z-index:
 
 
 
