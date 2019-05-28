@@ -1,0 +1,94 @@
+JavaScript
+(   ) => utilisation de l'élément comme un objet, permet acceder à ses méthodes et attributs
+
+	(12).toString()			=> "12"
+	("toto").lenght			=> 4
+	(function maFonction() {
+		instruction(s);
+	})()				=> appel de la fonction elle-même
+					permet d'isoler une fonction et de la lancer imédiatement (l'isolation évite les conflits en cas de définittion de variables identiques par plusieurs fonctions)
+
+
+
+HTML
+	obligatoire dans la balise qui ouvre le html
+	<html lang="fr">
+
+
+
+
+
+CSS
+spécificité du ciblage des éléments => quelle valeur de propriété sera prioritaire
+(ensuite, à priorité égale, c'est la valeur définie en dernier qui sera appliquée)
+
+# 	(id)					=> 1000pt
+. : []	(classe, pseudo-classes, selecteur CSS)	=> 1pt
+p ::	(élément et pseudo-élément)	 	=> 0.1 pt
+*	(tous les éléments)			=> 0 pt
+
+
+
+
+"obligatoire" : lorsqu'on indique à un élément une width ou height => fera exactement cette valeur et pas cette valeur +- margin, padding, ...
+* {
+	box-sizing: border-box;
+}
+ou plutot :	qui permet d'éviter de casser la cascade (si redéfinition de border-box dans un élément, ses enfants hériterons de la redéfinition !)
+* {
+	box-sizing: inherit;
+}
+body {
+	box-sizing: border-box;
+}
+
+
+
+liste
+	page-break-inside: avoid;	les éléments de la liste ne seront pas séparés, pas de retour dans une autre colonne au milieu de la liste
+
+
+table {
+	table-layout: fixed;		=> toutes les cases du tableau ont la même largeur
+
+
+Selecteur :
+	A:nth-child(6n+2)
+
+
+
+float:		retire l'élément du flux (vertical ou horizontal) et le place à la position indiquée
+clear:		il place l'élément à la suite de tout élément flotant afin de ne pas se retrouvé accolé à lui. Cad reprend le flux norma en dessous de l'élément flotant.
+
+technique du clearfix : ajout un dernier élément (chaine vide : '') à notre conteneur parent qui va devoir passer après les éléments flotant (clear: ) et donc permettre d'agrandir le conteneur pour s'assurer qu'il contient bien son/ses éléments flotants, cad que ceux-ci ne dépassent pas du contener.
+classe clearfix :	appliqué au conteneur qui contient un élément flotant => ajuste la taille du conteneur afin que l'élément flotant n'en sorte pas.
+.clearfix::after {
+  content: '';
+  display: block;
+  clear: left;
+}
+
+pseudo élément :
+::after		= élément ajouté dans le contener après son dernier élément enfant
+
+
+flex:
+	initial;	(par défaut) naturellement, les éléments flexibles se réduisent pour être contenu dans leur élément parent même si on leur a défini une taille spécifique (mais ne s'agrandissent pas)
+	none;		les éléments enfants n'ont pas leur taille redéfinie lorsque l'élément parent se réduit ou s'agrandit
+	auto;		ils s'agrandissent et rétrécissent en fonction de la taille de leur parent
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
