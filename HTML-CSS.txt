@@ -1,4 +1,54 @@
+	Bonne pratique CSS	(cours 3 - p19)
 
+Pas d'Id !!!
+
+Pas de balise	X a.button
+		X .button a
+
+Eviter les selecteur de descendance	X .article .title
+	préférer ">" plus prévisible	V .article > .title
+
+Pas de +, ~, :nth-child( ), ...
+
+Selecteur idéal : une seule classe !	W .maClasseSpecifiqueCSS
+	en nomant le visuel, le rendu ou la fonction visuelle	W .primary-button 	(bouton principal)
+								W .highlight-box 	(élément de mise en avant, de promotion)
+
+Pour relier au HTML : classes spécifique pour MeP nomée selon le principe :
+BEM = Block, Element and Modifier
+
+.block--modifier
+.block__element--modifier
+
+ex:
+	<ul class="menu">
+		<li class="menu__tab">
+		<li class="menu__tab">
+		<li class="menu__tab menu__tab--actif">
+	</ul>
+
+
+
+Exemple d'animation d'un titre h1 :
+h1 {
+  animation: bounceIn 3s infinite; 
+}
+
+@keyframes bounceIn {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  20%,
+  70% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1);
+  }
+}
 
 
 
