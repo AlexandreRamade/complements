@@ -1,0 +1,13 @@
+Lier Eclipse au server TomCat
+	Window > Preferences > Server > Runtime Environment > Add
+		choisir la version de TomCat téléchargée
+		indiquer l'emplacement du dossier de TomCat
+		> Finish
+
+
+
+
+
+
+
+
