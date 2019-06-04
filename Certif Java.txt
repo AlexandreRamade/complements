@@ -1,0 +1,72 @@
+-------------A tester
+cast nombres (int -> long / long -> int / ...)
+
+Qu'accepte Switch-case comme type de variable et comme modifier de variable (statis, ...)
+
+Date
+
+
+
+-------------Exception et RuntimeException
+
+RuntimeException hérite de Exception
+
+RuntimeException = exception levée lors du traitement et pouvant être capturée, crash le prog sinon.
+
+Exception = exception levée au moment de la compilation et qui arrète la compilation.
+
+
+
+Les Exception doivent être toujours renvoyées au niveau suivant
+
+Les RuntimeException sont transmise à l'élément parent automatiquement jusqu'à ce qu'elles soient capturées.
+
+Exemple :
+void maMethodeExc() throws Exception {
+}
+
+void maMethodeRunExc() throws RuntimeException {
+}
+
+void maMethodeDAppel() throws Exception {
+   maMethodeExc();
+}
+
+void maMethodeDAppel() {
+   maMethodeRunExc();
+}
+
+
+
+
+
+
+ATTENTION : IOException n'est pas RuntimeException !
+
+
+------------dans un constructeur :
+soit super(), soit this(), mais pas les 2 !
+Car chacun doit être placé sur la 1re ligne du constructeur.
+
+-------------en cas de redéfinition de méthode
+modifieur identique ou plus large !
+
+
+-------------La classe String est immutable
+	=> maString.replace('A', 'B') 			ne fait rien
+	=> maString = maString.replace('A', 'B')	remplace bien les A par B
+
+str += "ajout";	=> création d'une nouvelle chaine qui concatène les 2, puis affectation de cette chaine à la variable str.
+Contrairement à StringBuilder = String de taille variable !
+(semblable à Array et ArrayList)
+
+------------monPackage.*
+monPackage.* n'importe que les classes dans le package, mais pas les sous-packages !.
+
+
+
+-----------
+
+
+
+
