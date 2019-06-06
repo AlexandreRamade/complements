@@ -1,0 +1,348 @@
+
+
+Annotations
+Identification des beans
+@Component	générique pour identifier un composant géré par Spring
+@Service	identifie les beans contanant le code métier (nécéssitant une ou plusieurs injections)
+@Repository	identifie les beans liés à la persistence des données (DB, ...)
+@Controller	identifi les points d'entrées de l'appli
+
+   @Primary	à ajouter après l'une des annotations précédentes pour définir le bean à utiliser par défaut en cas de création de plusieurs beans de même type
+		ou ajout d'un identifiant
+			Rq: par défaut, l'identifiant = le nom de la classe avec la première lettre en minuscule.
+
+@Service
+@Primary
+public class FixedMeasure implements Measure {
+
+@Service
+public class VariableMeasure implements Measure {
+
+
+@Service("fixedMeasure")
+public class FixedMeasure implements Measure {
+
+@Service("variableMeasure")
+public class VariableMeasure implements Measure {
+
+
+
+
+@Configuration	identifie les classe ApplicationConfig (= Factory) qui vont gérer les beans (injection à la demande, persistance, ...)
+@ComponentScan	autoscan des éléments de l'appli afin de répérer automatiquement les Beans sans avoir à les déclarer dans la Factory
+		ATTENTION : ne scane que les classe contenue dans le même package (et sous-packages) que la classe ApplicationConfig
+@ComponentScan("com.monapp.monpackage")		scanne les classes du package et sous-package indiqué
+
+
+@ComponentScan
+@Comfiguration
+public class MonApplicationConfig {
+}
+
+@ComponentScan("com.monapp.monpackage")
+@Comfiguration
+public class MonApplicationConfig {
+}
+
+ApplicationContext	objet servant à obtenir les bean manuellements
+ApplicationContext context = new AnnotationConfigApplicationContext(MonApplicationConfig.class);
+MaClasseService maClasseService = context.getBean(MaClasseService.class);
+
+
+@Autowired	permet d'injecter un bean géré par Spring dans une classe @Component
+		Rq: recheche le bean à injecter d'abord par type, puis par nom (identifiant)
+		Rq: @Autowired est facultatif pour l'injection par constructeur à condition qu'il n'existe qu'un seul constructeur !
+	NoSuchBeanDefinitionException = bean non trouvé
+	NoUniqueBeanDefinitionException = plusieurs bean peuvent correspondre au type demandé
+@Autowired(requires = "false")	injection facultative (si la classe bean n'est pas trouvée, injecte null et ne retourne pas l'erreur NoSuchBeanDefinitionException)
+
+   @Qualifier("   ")	définit le bean à utiliser via son identifiant en cas d'ambiguité (si plusieurs beans sont possibles car de mêmes types => voir @Primay)
+
+@Ressource	équivalente à @Autowired, mais effectu la recherche du bean à injecter d'abord par nom, puis pas type.
+
+Injection par setter :
+@Component
+public class MaClasseImpl implements MonInterfaceService {
+   @Autowired
+   private MonAutreClasseImpl maci;
+}
+
+@Component
+public class MaClasseImpl implements MonInterfaceService {
+   private MonAutreClasseImpl maci;
+
+   @Autowired
+   public void setMonAutreClasseImpl(MonAutreClasseImpl maci) {
+      this.maci = maci;
+}
+
+
+Injection par constructeur :
+@Component
+public class MaClasseImpl implements MonInterfaceService {
+   private MonAutreClasseImpl maci;
+
+   @Autowired
+   public MaClasseImpl(MonAutreClasseImpl maci) {
+      this.maci = maci;
+}
+
+
+
+
+Injection par setter :
+@Component
+public class MaClasseImpl implements MonInterfaceService {
+   @Autowired
+   @Qualifier("maciA")
+   private MonAutreClasseImpl maciA;
+}
+
+Injection par constructeur :
+@Component
+public class MaClasseImpl implements MonInterfaceService {
+   private MonAutreClasseImpl maci;
+
+   @Autowired
+   public MaClasseImpl(@Qualifier("maciB") MonAutreClasseImpl maciB) {
+      this.maci = maci;
+}
+
+
+options :
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)		définit le scope
+.SINGLETON		(défaut) une seule instance pour toute l'appli
+.SCOPE_PROTOTYPE	une instance à chaque injection
+.REQUEST		une instance par requete
+.SESSION		une instance par session utilisateur (dépréciée)
+.APPLICATION		une instance par application
+.WEBSOCKET		une instance par socket
+
+@Lazy			instancié et injecté uniquement lorsque il y en a besoin => allège le lancement de l'appli
+			(par défaut, tout est instancié à l'ouverture de l'appli)
+
+@Service
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Lazy
+public class MaClasseService {
+}
+
+
+---------------------------------------------------------------------------
+Ressource
+
+ResourceLoader		bean de Spring qui permet d'accéder aux ressource (classpath, file, url)
+   .getRessource(   )	selectionne le type de ressource et son adresse
+
+ressourceLoader.getRessource("classpath:monFichier.txt");
+ressourceLoader.getRessource("file:///C:/monChemin/monFichier.txt");	ATTENTION : ///C:/ nécéssaire qu'avec Windows
+ressourceLoader.getRessource("url:https://www.monsite.com");
+
+
+@Component
+public class MaClasseService {
+   @Autowired
+   private RessourceLoader ressourceLoader;
+
+   public void readFile() {
+      try {
+         Ressource ressource = ressourceLoader.getRessource("file:///C:/monChemin/monFichier.txt");
+         InputStream stream = resource.getInputStream();
+         Scanner scanner = new Scanner(stream).useDelimiter("\\n");
+         while (scanner.hasNext()) {
+            System.out.println(scanner.next());
+      }catch (IOException e) {
+      }
+   }
+}
+      
+
+
+Fichier de configuration
+
+monFichierConfig.properties	fichier de config dans src/main/ressources
+
+myapp.name=BigCorp application
+myapp.version=1
+myapp.emails=contact-dev@bigcorp.com,test@bigcorp.com		=> List ou Set
+myapp.baseuri=${BASE_URI:http://localhost:8080}			=> valeur de la variable environement, si absente valeur par défaut
+
+
+Propriétés
+
+@PropertySource(   )		charge le fichier .properties indiqué en paramètre
+			FileNotFoundException
+@PropertySource("classpath:monFichierConfig.properties")
+	Sans lever d'exception en cas de fichier non trouvé :
+@PropertySource(value = "classpath:monFichierConfig.properties" ignoreRessourceNotFound=true)
+
+@Value(   )		récupère la valeur de la propriété dans le fichier
+
+@Value("${myapp.name}")
+private String name
+
+@Value("${myapp.version}")
+private Integer version
+
+@Value("${myapp.name}")
+private Set<String> emails;
+
+
+
+Profils
+
+@Profil(   )		défini le profil pour lequel la classe de configuration (ApplicationConfig) ou le bean va être utilisé
+			ATTENTION : si elle est utilisée sur la classe, @Autoscan ne doit pas être appliquée car il ne peut être utilisé qu'une seule fois : sur la classe ApplicationConfig générale
+
+@ComponentScan
+@Comfiguration
+public class monApplicationConfig {
+}
+
+@Configuration
+@Profile("!prod") //ou @Profile("default")
+public class monApplicationConfig {
+}
+
+@Configuration
+@Profile("prod")
+public class monApplicationConfig {
+}
+
+Activation du profil :
+ ° via la variable d'environnement de Spring
+Edit Configurations > Environment variables
+ -> spring.profiles.active=prod			manuellement
+
+-Dspring.profies.active="prod, cloud"		en ligne de commande
+		
+.setActiveProfiles(   )		utilisation d'un profil via l'ApplicationContext
+
+AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+context.getEnvironment().setActiveProfiles("dev", "cloud");
+context.register(BigCorpApplicationConfig.class);
+context.refresh();
+
+
+
+Environnement
+
+Environment
+
+@Component
+public class MaClasseService {
+   @Autowired
+   private Environment environment;
+
+   public ApplicationInfo applicationInfo() {
+      String name = environment.getRequiredProperty("myapp.name");
+      Integer version = environment.getRequiredProperty("myapp.version", Integer.class);
+      Set<String> emails = environment.getRequiredProperty("myapp.emails", Set.class);
+      String javaHome = environment.getRequirdProperty("JAVA_HOME");
+
+      return new ApplicationInfo(name, version, emails);
+   }
+}
+
+
+
+----------------------------------------------------------AOP
+
+AOP = Aspect-Oriented Programming
+permet de surcharger une méthode en ajoutant des comportements
+Pour cela, on localise les méthodes à modifier (= les join points) (plusieurs join points = point cut)
+on défini le code à rajouter avant et/ou après le résultat de cette méthode (les Advice)
+L'ensemble est appelé : Aspect
+
+On peut recréer ce comportement manuellement :
+public class ComputerProxy extends Computer {
+   public int add(int a, int b) {
+      System.out.println("DEBUT Appel de la méthode add");
+      int result = super.add(a, b);
+      System.out.println("FIN Appel de la méthode add : " + result)
+      return result;
+   }
+}
+
+ATTENTION : ne doit être appliqué que sur des classe implémentant une interface ! Sinon rend la déclaration plus complexe.
+
+	
+compile "org.springframework:spring-aop:${springVersion}	dépendances à ajouter dans build.gradle
+compile "org.aspectj:aspectjweaver:1.8.13"			AspectJ est l'implémentation de référence, mais Spring AOP (qui se base sur les bibliothèques AscpectJ) est plus simple à utiliser
+
+
+	indiquer de gérer également l'AOP
+@Configuration
+@EnableAspectJAutoProxy				
+public class MonApplicationConfig {
+}
+
+	Définir une nouvelle annotation spécifique pour chaque AOP
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface MonAnnotationAOP { }
+
+
+	Annoter les méthodes concernées avec l'annotation
+@Service
+public class MaClasseServiceImpl implements MaClasseService {
+   @MonAnnotationAOP
+   @Override
+   public String maMethode(String monParametre) {
+   }
+}
+
+	Définir l'Advice
+@Component
+@Aspect
+public class MonAnnotationAOPAspect {
+
+   @Before("@annotation(MonAnnotationAOP)")
+   public void logServiceBeforeCall(JoinPoint jp) {
+      System.out.println("Le bean concerné par l'Aspect est : " + jp.target());
+      System.out.println("Appel de la méthode " + jp.getSignature());
+      System.out.println("avec les agruments :" + jp.args());
+   }
+
+   @Around("@annotation(com.training.spring.bigcorp.config.Secure)")
+   public Object doCheckSecurity(ProceedingJoinPoint pjp) throws Throwable Object returnedValue;
+      CurrentUser user = applicationContext.getBean(CurrentUser.class);
+      if(securityService.checkAccess(user)){
+      return pjp.proceed();
+   }
+      throw new ForbiddenTargetException("User not allowed to use " + "this feature");
+   }
+
+
+   @AfterReturning(pointcut = "@annotation(MonAnnotationAOP)", returning = "element")
+   public void logServiceAfterCall(JoinPoint jp, Object element) {
+      if (element == null) {
+         System.out.println("Finder " + jp.getTarget() + "returns null";
+      } else {
+         System.out.println("Finder " + jp.getTarget() + "returns "+ element.toString());
+   }
+
+
+   @After("@annotation(MonAnnotationAOP) && args(monParametre)")
+   public void logServiceBeforeCall(JoinPoint jp, String monParametre) {
+      System.out.println("Le paramètre qui a été utilisé par la méthode était : " + monParametre);
+   }
+
+   @AfterThrowing(pointcut = "@annotation(Finder)", throwing = "ex")
+   public void logServiceAfterException(RuntimeException ex) {
+      System.out.println("Error " + ex.getMessage());
+   }
+}
+
+
+----------------------------------------------------Boot
+
+
+
+
+
+
+
+
+
