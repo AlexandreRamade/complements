@@ -305,7 +305,7 @@ public class MonAnnotationAOPAspect {
       System.out.println("avec les agruments :" + jp.args());
    }
 
-   @Around("@annotation(com.training.spring.bigcorp.config.Secure)")
+   @Around("@annotation(com.training.spring.bigcorp.config.Secure)")		//permet de choisir si la méthode est exécutée ou non !
    public Object doCheckSecurity(ProceedingJoinPoint pjp) throws Throwable Object returnedValue;
       CurrentUser user = applicationContext.getBean(CurrentUser.class);
       if(securityService.checkAccess(user)){
@@ -315,7 +315,7 @@ public class MonAnnotationAOPAspect {
    }
 
 
-   @AfterReturning(pointcut = "@annotation(MonAnnotationAOP)", returning = "element")
+   @AfterReturning(pointcut = "@annotation(MonAnnotationAOP)", returning = "element")	//exécuté seulement si la méthode n'a pas levé d'exception
    public void logServiceAfterCall(JoinPoint jp, Object element) {
       if (element == null) {
          System.out.println("Finder " + jp.getTarget() + "returns null";
@@ -323,20 +323,180 @@ public class MonAnnotationAOPAspect {
          System.out.println("Finder " + jp.getTarget() + "returns "+ element.toString());
    }
 
+   @AfterThrowing(pointcut = "@annotation(Finder)", throwing = "ex")	//exécuté seulement si la méthode a retourné une exception
+   public void logServiceAfterException(RuntimeException ex) {
+      System.out.println("Error " + ex.getMessage());
+   }
 
-   @After("@annotation(MonAnnotationAOP) && args(monParametre)")
+   @After("@annotation(MonAnnotationAOP) && args(monParametre)")	//exécuté après la méthode, qu'il y ait eu exception ou non
    public void logServiceBeforeCall(JoinPoint jp, String monParametre) {
       System.out.println("Le paramètre qui a été utilisé par la méthode était : " + monParametre);
    }
 
-   @AfterThrowing(pointcut = "@annotation(Finder)", throwing = "ex")
-   public void logServiceAfterException(RuntimeException ex) {
-      System.out.println("Error " + ex.getMessage());
-   }
+   
 }
 
 
 ----------------------------------------------------Boot
+Spring Boot = projet qui embarque avec lui un server pour être déployé automatiquement dans le cloud
+Utilise : framework Spring 5, Java 8, Tomcat 8.5 par défaut (compatible Jetty 9.4, Undertow 3.1)
+
+Nouveau projet	Démarer un projet sur https://start.spring.io/ (avec les dépendances Spring Web Starter, Spring Boot Devtools) puis ouvrir le projet avec l'option auto-import sur InteliJ
+
+@SpringBootApplication		méta-annotation remplacent @Configuration + @ComponentScan + @EnableAutoConfiguration + @EnableConfigurationProperties
+				=> autoscan Spring sur tout le projet pour gérer l'injection des Beans, permettre l'auto-configuration, permet de récupérer les valeurs des propriétés dans les fichiers applications.properties et de les injecter dans les Beans dédiés annotés avec @ConfigurationProperties(prefix = "...")
+
+
+@SpringBootApplication
+@EnableConfigurationProperties
+public class MonApplication {
+   public static void main(String[] args) {
+   }
+}
+
+
+application.properties		fichier contenu dans src/main/resources/ chargé automatiquement (inutile d'utiliser @PropertySource) quelque soit le profil
+application-default.properties
+application-prod.properties	fichiers contenant les valeurs des propriétés spécifiques à chaque profil et venant surcharger les propriétés par défaut si le profil est activé
+application-cloud.properties
+
+
+gradlew clean assemble		crée le fichier .jar dans build/libs/ si tous les tests unitaires sont passants
+java -jar build/libs/monProjet-0.0.1-SNAPSHOT.jar	lanche l'appli sur le serveur
+
+gradlew --continuous bootRun	lance l'appli sur le serveur en continue (prenant en compte les modif en temps réels)
+				(ctrl+C pour l'arréter)
+
+
+-----Tests
+
+
+@RunWith(SpringRunner.class)	à placer sur les classes Test afin d'indiquer que le test est géré par Spring et JUnit
+@SpringBootTest			à placer sur les classes Test afin de créer un application context spécifique au test
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class MaClasseTest {
+   @Test
+   public void testMaMehtode() {
+   }
+}
+
+
+-----Logs
+Spring Boot integre SLF4J et LogBack pour gérer les logs
+Simplement besoin de définir les niveaux dans application.properties et d'appeller le LOGGER dans la classe
+
+application.properties
+logging.file=c:/data/logs/monappli.log		=> fichier de sortie des Logs
+logging.level.root=INFO;			=> niveau de Log par défaut
+logging.level.monpackage=ERROR			=> niveau de log spécifique aux classes d'un package et de ses sous-packages
+logging.level.monpackage.monsouspackage=DEBUG
+
+logback.xml		il est toujours possible de définir les propriétés des logs dans src/main/resources/logback.xml, utile notamment pour les system plus complexe de rolling
+<configuration>
+   <include resource="org/springframework/boot/logging/logback/base.xml"/> (1)
+   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender"> (2)
+      <file>/data/logs/bigcorp.log</file>
+      <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+         <FileNamePattern>/data/logs/bigcorp/recovery.%d{yyyy-MM-dd}.%i.zip</FileNamePattern>
+         <maxFileSize>32MB</maxFileSize>
+         <maxHistory>15</maxHistory>
+         <totalSizeCap>500MB</totalSizeCap>
+      </rollingPolicy>
+      <encoder>
+         <pattern>${CONSOLE_LOG_PATTERN}</pattern> (3)
+      </encoder>
+   </appender>
+   <logger name="com.training.spring.bigcorp" level="DEBUG" additivity="false"> (4)
+      <appender-ref ref="FILE"/>
+      <appender-ref ref="CONSOLE"/>
+     </logger>
+   <root level="INFO"> (5)
+      <appender-ref ref="FILE" />
+   </root>
+</configuration>
+
+(1) inclusion de la configuration de Spring Boot (permet d'avoir accés au logger de base CONSOLE) (3)
+(4) possibilité de définir plusieurs niveau par logger
+(5) root level = niveau de log par défaut
+(3) rolling, 32 Mo par fichier max, 15 fichiers max, 500 Mo max pour la taille de tous les fichiers réunis
+
+
+@Service
+public class MaClasseImpl implements MaClasse {
+   private final static Logger LOGGER = LoggerFactory.getLogger(MaClasseImpl.class);
+
+   public void maMethode(String maString) {
+      LOGGER.info("Appel de maMethode avec argument {}", maString);
+      ...
+   }
+}
+
+
+----Propriétés
+Chagement des fichiers application.properties automatique
+ces fichiers peuvent se placer à différents endroits, mais selon leur emplacement, ils n'ont pas la même priorité :
+1. `file:./config/`   <- emplacement + prioritaire
+2. `file:./`
+3. `classpath:/config/`
+4. `classpath:/`	<- emplacement - prioritaire
+
+
+@ConfigurationProperties(prefix = "monappli")		permet de récupérer automatiquement les valeurs des propriétés et de les placer dans un bean sans avoir à utiliser @Autowired Environment ni @Value("${monappli.mapropriete}")
+							ATTENTION : pour les classes Test, ne fonctionne que si la classe principale (contenant la méthode main) est annotée avec @EnableConfigurationProperties !
+
+application.properties :
+monappli.name=Mon nom
+monappli.version=1.0.0
+monappli.emails=contact@bigcorp.com, test@bigcorp.com
+monappli.sousgroupe.measure-fixe=10
+monappli.sousgroupe.measure-variable=20
+
+							
+@Component
+@ConfigurationProperties(prefix = "monappli")
+public class MonAppliProperties {
+   private String name;
+   private int version;
+   private Set<String> emails;
+
+   @NestedConfigurationProperty
+   private MonSousGroupeDeProprietes sousgroupe;
+
+   // getter et setter
+}
+		//@Nested identifie la classe automatiquement sans avoir besoin de l'annoter avec @Component
+public class MonSousGroupeDeProprietes {
+   private int measureFixe;
+   private int measureVariable;
+   
+   //getter et setter
+}
+
+
+----------------------------------------JPA
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
