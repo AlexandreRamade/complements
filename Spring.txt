@@ -435,7 +435,7 @@ public class MaClasseImpl implements MaClasse {
 
 
 ----Propriétés
-Chagement des fichiers application.properties automatique
+Chargement des fichiers application.properties automatique
 ces fichiers peuvent se placer à différents endroits, mais selon leur emplacement, ils n'ont pas la même priorité :
 1. `file:./config/`   <- emplacement + prioritaire
 2. `file:./`
@@ -475,7 +475,231 @@ public class MonSousGroupeDeProprietes {
 }
 
 
-----------------------------------------JPA
+---------------------------------------------JPA
+
+Dans le fichier build.gradle, ajout de la dépendence :
+
+compile('org.springframework.boot:spring-boot-starter-data-jpa')	=> ajout de data-JPA
+compile('org.springframework.boot:spring-boot-starter-web')		=> permet accés de la DB via navigateur web
+compile('com.h2database:h2')						=> Embarquement d'une DB (ici : H2) dans le projet Gradle
+
+
+Dans le fichier application.properties :
+
+# Spring boot : datasource						=> config de la DB
+spring.datasource.url=jdbc:h2:mem:bigcorp;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.platform=h2
+spring.datasource.username=sa
+spring.datasource.password=
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.sqlScriptEncoding=UTF-8
+
+# Spring boot : H2 datasource						=> permet accés de la DB via navigateur web
+spring.h2.console.enabled=true
+spring.h2.console.path=/console
+
+# Spring boot : JPA							=> permet la création automatique des tables à partir des annotations indiquées dans les @Entity
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+spring.jpa.ddl-auto=create-drop
+spring.jpa.show_sql=true			=> affiche les requetes SQL dans la console
+
+
+Dans le navigateur web : accés à la DB
+http://localhost:8080/console
+
+
+src/main/resources/schema.sql		fichier d'initialisation de la DB
+					(utilie pour JDBC, mais facultatif si les tables sont auto-générées par JPA)
+
+Exemple :
+CREATE TABLE SITE(ID VARCHAR(255) PRIMARY KEY, NAME VARCHAR(255) NOT NULL);
+CREATE TABLE CAPTOR(ID VARCHAR(255) PRIMARY KEY, NAME VARCHAR(255) NOT NULL,
+SITE_ID VARCHAR(255) NOT NULL);
+CREATE TABLE SITE_CAPTORS(SITE_ID VARCHAR(255) NOT NULL, CAPTOR_ID VARCHAR(255) NOT NULL);
+ALTER TABLE CAPTOR ADD FOREIGN KEY (SITE_ID) REFERENCES SITE(ID);
+ALTER TABLE SITE_CAPTORS ADD FOREIGN KEY (SITE_ID) REFERENCES SITE(ID);
+ALTER TABLE SITE_CAPTORS ADD FOREIGN KEY (CAPTOR_ID) REFERENCES CAPTOR(ID);
+
+
+src/main/resources/data.sql		fichier de remplissage de la DB
+
+Exemple :
+INSERT INTO SITE (ID, NAME, version) VALUES('site1', 'Bigcorp Lyon', 0);
+INSERT INTO CAPTOR (DTYPE, ID, NAME, site_id, default_power_in_watt, version) VALUES('FIXED', 'c1', 'Eolienne', 'site1', 1000000, 0);
+INSERT INTO CAPTOR (DTYPE, ID, NAME, site_id, min_power_in_watt, max_power_in_watt, version) VALUES('SIMULATED', 'c2', 'Laminoire à chaud', 'site1', 500000, 10000000, 0);
+INSERT INTO MEASURE (ID, INSTANT, VALUE_IN_WATT, CAPTOR_ID, version) VALUES(-1, PARSEDATETIME ('09-08-18 11:00:00','dd-MM-yy hh:mm:ss', 'fr', 'UTC'), 1000000, 'c1', 0);
+INSERT INTO MEASURE (ID, INSTANT, VALUE_IN_WATT, CAPTOR_ID, version) VALUES(-2, PARSEDATETIME ('09-08-18 11:01:00','dd-MM-yy hh:mm:ss', 'fr', 'UTC'), 1000124, 'c1', 0);
+INSERT INTO MEASURE (ID, INSTANT, VALUE_IN_WATT, CAPTOR_ID, version) VALUES(-3, PARSEDATETIME ('09-08-18 11:02:00','dd-MM-yy hh:mm:ss', 'fr', 'UTC'), 1001234, 'c1', 0);
+
+
+------Test
+@RunWith(SpringRunner.class)
+@DataJpaTest				=> a ajouter sur la classe Test pour utiliser JPA et le lien vers la DB 
+@ComponentScan
+
+
+
+-----------------------Spring Data JPA
+JpaRepository< , >		interface dont doit hériter tous les DAO et permétant de ne pas avoir ré-écrire les méthodes principales (.findAll(), .save(), .remove(), ...)
+
+public interface MonElementDao extends JpaRepository<MonElement, String> {
+}
+
+	Rq: le second type générique est celui de l'id de l'élément (Integer, Long, String, ...) et servira pour les méthodes : .findById(   )
+
+
+personalisation de l'interface DAO :
+	utilisation d'une interface CustomDao
+
+public interface MonElementDao extends JpaRepository<MonElement, String>, MonElementCustomDao {
+}
+
+public interface MonElementCustomDao {
+   public List<Captor> findBySiteId(String siteId);
+}
+
+@Repository
+public class MonElementDaoImpl implements MonElementDao {
+
+   @PersistenceContext
+   private EntityManager em;
+
+   @Override
+   public List<Captor> findBySiteId(String siteId) {
+      return em.createQuery("select c from Captor c inner join c.site s where s.id = :siteId", Captor.class)
+         .setParameter("siteId", siteId)
+         .getResultList();
+   }
+}
+
+	ou modifiaction de l'interface MonElementDao elle-même en utilisant les conventions de JpaRepository :
+public interface CaptorDao extends JpaRepository<Captor, String>, CaptorCustomDao {
+   
+   List<Captor> findBySiteId(String siteId);			=> findBy... requete retournant un élément ou liste d'élément
+   List<Captor> findByNameAndSiteId(String name, String siteId);
+   List<Captor> findByNameOrSiteId(String name, String siteId);
+   List<Captor> findDistinctBySiteId(String siteId);
+   List<Captor> countByName(String name, String siteId);
+
+
+   @Query("select c from Captor c where c.name=:name")		=> @Query permet de définir une requete JPQL (Rq: ici on aurait pu utiliser la gestion automatique comme ci-dessus)
+   Captor findByName(@Param("name") String name);
+   
+   @Modifying
+   @Query("delete from Captor c where c.name = ?1")		=> @Modifying permet de modifier le comportment par défaut d'une requete automatique
+   void deleteByName(String name);
+}
+
+
+@Version		active le controle optimiste de la concurrence
+			cad, lorsque l'utilisateur manipule une entité, s'il essai de la persister mais que son numéro de version à changé entre temps, alors une exception OptimisticLockException est levée
+
+
+@Entity
+public class MonElement {
+   @Id
+   private String id = UUID.randomUUID().toString();
+
+   @Version
+   private Integer version;
+
+   ...
+
+   //constructeur vide
+
+   //getter et setter
+}
+
+
+
+Annotations de validations	controle que les valeurs des champs avant la persistence de l'élément
+@Null 		la valeur doit être nulle
+@NotNull 	la valeur doit être non nulle
+@AssertTrue 	la valeur doit être true
+@AssertFalse 	la valeur doit être false
+@DecimalMin	doit être supérieure à la décimale indiquée
+@DecimalMax
+@Digits		ne doit pas avoir plus de chiffre significatifs (av et ap la virgule compris)
+@Size		défini les contraintes sur la taille d'une chaine de caractère
+@Min		min pour un entier
+@Max
+@Pattern	vérifi la conformité d'une chaine avec une regex
+@Future		la date doit être posterieure à la date courante
+@Past
+@Email		doit être un mail
+@Valid		se place sur une propriété pour la validée
+
+
+
+
+@Entity
+public class Measure {
+   @Id
+   @GeneratedValue
+   private Long id;
+
+   @NotNull
+   @Past
+   private Instant instant;
+
+   @Min(0)
+   @NotNull
+   private Integer minPower;
+
+   @Min(0)
+   @NotNull
+   private Integer maxPower;
+
+   @Size(min = 15, max = 150)
+   @Email
+   private String email;
+
+   @AssertTrue(message = "minPower should be less than maxPower")
+   public boolean isValid() {
+       return this.minPower <= this.maxPower;
+   }
+
+   // ...
+}
+
+
+Exemple de classes de Test avec les annotations de validation :
+@Test
+public void createShouldThrowExceptionWhenNameIsNull() {
+   Assertions.assertThatThrownBy(() -> {
+         measureDao.save(new Measure(null, null));
+         entityManager.flush();
+         })
+      .isExactlyInstanceOf(javax.validation.ConstraintViolationException.class)
+      .hasMessageContaining("must not be null");
+}
+
+@Test
+public void createSimulatedCaptorShouldThrowExceptionWhenMinMaxAreInvalid() {
+   Assertions.assertThatThrownBy(() -> {
+         measureDao.save(new Measure(50, 25));
+         entityManager.flush();
+         })
+      .isExactlyInstanceOf(javax.validation.ConstraintViolationException.class)
+      .hasMessageContaining("minPower should be less than maxPower");
+}
+
+@Test
+public void createShouldThrowExceptionWhenNameSizeIsInvalid() {
+   Assertions.assertThatThrownBy(() -> {
+         measureDao.save(new Measure("mail@sfr.fr"));
+         entityManager.flush();
+         })
+      .isExactlyInstanceOf(javax.validation.ConstraintViolationException.class)
+      .hasMessageContaining("size must be between 15 and 150");
+}
+
+
+----------------------------------------------MVC
+
+
+
+
 
 
 

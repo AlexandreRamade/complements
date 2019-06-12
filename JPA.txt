@@ -1,0 +1,35 @@
+@Column(name="power_source", nullable = false)
+@Enumerated(EnumType.STRING)
+public PowerSource powerSource;
+
+
+options de @Column(   )
+name nom de la colonne
+unique permet de créer une contraite d’unicité uniquement sur ce champ
+nullable champ not null ou non (défaut : true)
+insertable inclu dans les ordres SQL INSERT (défaut : true)
+updatable inclu dans les ordres SQL INSERT (défaut : true)
+updatable personnalisa
+length ajuste la longueur d’un champ string(par défaut : 255)
+precision ajuste le nombre de chiffres d’un champ décimal stockées (à gauche et à droite du sépateur
+décimal)
+scale ajuste le nombre de chiffre après le séparateur décimal (par défaut : 0)
+
+
+
+Pour les paramètres de type java.time (Instant, LocalDate, ...)
+@Column(nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+private Instant creation;
+
+
+
+
+
+
+
+
+
+
+
+
+
