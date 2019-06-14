@@ -696,32 +696,274 @@ public void createShouldThrowExceptionWhenNameSizeIsInvalid() {
 
 
 ----------------------------------------------MVC
+Dans build.gradle
+dependencies {
+   implementation('org.springframework.boot:spring-boot-starter-web')
+}
+		=> application autonome, cad qui embarque son propre serveur auto configuré
+
+
+resources web :
+src/main/resources
+   /static
+	/css	=> fichiers CSS
+	/img	=> fichiers images
+	index.html
+   /template	=> vues partielles (.jsp, .mustache, ...)
+
+
+@Controller		déclare un bean Spring de type Controller
+			equiv à une servlet, mappage via les annotations, redirection vers le modelle et la vue par ModelAndVue
+
+@Controler
+@RequestMapping("/suiteUrlA")		=> gere tous les URL https://monAppli/suiteUrlA/...
+@Transactional				=> indispensable si entités liées à DB
+public class MonController {
+   
+   @Autowired
+   MonElementDao monElementDao;
+
+   @RequestMapping(path = "/suiteUrlB", method = RequestMethod.GET)
+   public ModelAndView create() {
+      return new ModelAndView("maPage").addObject("monEntity", new MonEntity());
+   }
+
+   @GetMapping("/suiteUrlB/{entityId}")
+   public ModelAndView findById(@PathVariable String monId) {
+      MonElement monEntity = monEntityDao.findById(entityId).orElseThrow(IllegalArgumentException::new);
+      return new ModelAndView("maPageDeMonEntity").addObject("monEntity", monEntity);
+   }
+
+   @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+   public ModelAndView save(MonEntity monEntity) {		=> génération automatique de l'entité via les paramètres du formulaire si ceux-ci respectent les noms des champs de l'entité
+      entityDao.save(entity);
+      return new ModelAndView("monAutrePage");
+    }
+
+   @PostMapping("/suiteUrlB/delete?entityId=monId")
+   public ModelAndView delete(@RequestParam String entityId) {
+      Entity entity = entityDao.findById(entityId).orElseThrow(IllegalArgumentException::new);
+      entityDao.delete(entity);
+      return new ModelAndView("monAutrePage");
+   }
+}
+
+
+options des annotations :
+
+   consumes	défini le type de données acceptées en entrées	@PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+   produces	défini le type de données acceptées en sortie	@GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
+   headers	filtre le mapping en fonction des attributs dans le head de la requete html
+   params	filtre le mapping en fonction des paramètres de l'URL
+   
+
+objet récupérable en parametre dans les méthodes annotées @XxxMaping(   ) :
+   Model	accés au modele (map clé/valeur)
+   Locale	objet contenant les infos régionales de l'utilisateur envoyés par http
+   HttpSession	accés à l'ojet session
+   HttpServletRequest	accés à l'objet request et info valides seulement le temps de la requete
 
 
 
+DTO = Data Transfer Object (objet de transfert de données)
+
+
+----Mustache
+
+Dans build.gradle
+dependencies {
+   implementation('org.springframework.boot:spring-boot-starter-mustache')
+}
+
+		= utilisation des fichier .mustache (équiv de .jsp en plus basique mais plus performant)
+
+<header>
+   {{>partial-header}}		=> ajout de la page "partial-header.mustache" à la page
+</header>
+
+<section>
+   {{#items}}			=> si la liste existe, alors pour chaque item
+      Name: {{name}}		=> item.name
+      Price: {{price}}
+      {{#features}}
+         Feature: {{description}}
+      {{/features}}
+   {{/items}}
+   {{^items}}			=> si la liste items n'existe pas
+      Pas d'item{
+   {/items}}
+</section>
+
+<section>
+   {{! value contient '<b>Hello</b>'}} 	=>commentaire
+   {{value}}				=>caractères HTML échappées pour éviter l'injection (ex : &lt;b>Hellob&gt)
+   {{{value}}}				=>caractère HTML non échapés (ex : <b>Hello</b>)
+</section>
+
+
+-------REST = REpresentational State Transfer
+
+API REST ou API Web	au lieu de renvoyer des données sous forme de pages web interprétable par le navigateur, on peut exposer les données de notre application via l'API REST incluse dans Spring. Les données (toujours demandées vias des URL) sont transmisent cette fois au format JSON pour être utilisé par une autre appli, par du JavaScript, ...
+			Pour cela, on ne passe plus par les Controller, mais par des RestController qui ne renvérons pas des ModelAndView, mais des objets DTO contenant les données qui seront automatiquements transcrites en JSON par Spring avant d'être renvoyées au client
+
+Exemple :
+
+@RestController
+@RequestMapping("/sites/{siteId}/captors")
+@Transactional
+public class RestCaptorController {
+
+   @Autowired
+   private CaptorDao captorDao;
+
+   private List<CaptorDto> toDtos(List<Captor> captors){
+      return captors.stream().map(this::toDto).collect(Collectors.toList());
+   }
+
+   @GetMapping
+   public List<CaptorDto> findAll(@PathVariable String siteId) {
+      return toDtos(captorDao.findBySiteId(siteId));
+   }
+
+   @GetMapping("/{id}")
+   public CaptorDto findById(@PathVariable String siteId, @PathVariable String id) {
+      Captor captor = captorDao.findById(id).orElseThrow(NotFoundException::new);
+      return CaptorDto.toDto(captor);
+   }
+
+   @PostMapping
+   public CaptorDto save(@PathVariable String siteId, CaptorDto captorDto) {
+      Site site = siteDao.findById(siteId).orElseThrow(NotFoundException::new);
+      Captor captor = captorDto.toCaptor(site);
+      return CaptorDto.toDto(captorDao.save(captor));
+   }
+
+   @PutMapping("/{id}")
+   public void update(@PathVariable String siteId, @PathVariable String id, CaptorDto captorDto) {
+      Captor captorToUpdate = captorDao.findById(id).orElseThrow(NotFoundException::new);
+      captorToUpdate.setName(captorDto.getName());
+      captorDao.save(captorToUpdate);
+   }
+
+
+   @DeleteMapping("/{id}")
+   public void delete(@PathVariable String siteId, @PathVariable String id) {
+      measureDao.deleteByCaptorId(id);
+      captorDao.deleteById(id);
+   }
+}
 
 
 
+A l'inverse, si on veut utiliser l'API REST d'une autre application via une URL, on créé une classe Service qui va utiliser RestTemplate :
 
 
+@Service
+public class MonService {
+   private final RestTemplate restTemplate;
+
+   public MonService(RestTemplateBuilder builder) {
+      this.restTemplate = builder.setConnectTimeout(1000).build();		=> interruption de la demande si délai supérieur à 1s
+   }
+
+   @Override
+   public UserDto readMeasures(String userId) {
+      UriComponentsBuilder builder = UriComponentsBuilder
+         .fromUriString("http://urlappli/users/{user_id}")		=> url de l'appli REST et contenent la demande
+         .build(userId);
+      return this.restTemplate.getForObject(builder.toUriString(), UserDto.class);	=> appel du service en précisant le type d'objet qui servira pour récupérer les infos après lecture des données JSON
+   }
+}
 
 
+Exemple avec une liste d'objet et une url avec des paramètres :
+
+@Service
+public class SimulatedMeasureService implements MeasureService<SimulatedCaptor> {
+   private RestTemplate restTemplate;
+   
+   public SimulatedMeasureService(RestTemplateBuilder builder) {
+      this.restTemplate = builder.setConnectTimeout(1000).build();
+   }
+
+   public List<Measure> readMeasures(SimulatedCaptor captor, Instant start, Instant end, MeasureStep step) {
+      checkReadMeasuresAgrs(captor, start, end, step);
+      UriComponentsBuilder builder = UriComponentsBuilder
+         .fromHttpUrl("http://localhost:8090/measures")
+         .path("")
+         .queryParam("start", start)
+         .queryParam("end", end)
+         .queryParam("min", captor.getMinPowerInWatt())
+         .queryParam("max", captor.getMaxPowerInWatt())
+         .queryParam("step", step.getDurationInSecondes());
+
+      Measure[] measures = this.restTemplate.getForObject(builder.toUriString(), Measure[].class);
+
+      return Arrays.asList(measures);
+   }
+}
 
 
+------Exception
+
+src/main/resources/templates/error		emplacement des pages d'erreurs personnalisées
+
+404.mustache					page appelée automatiquement lors de la levée d'une erreur 404
+
+server.error.include-stacktrace=always		à ajouter dans application.properties pour permettre un affichage plus complet des messages d'erreurs dans les pages
+
+						accés au valeurs des champs de l'erreur
+<h1>{{status}} : {{error}}</h1>
+   <ul>
+      <li>Heure : {{timestamp}}</li>
+      <li>Path : {{path}}</li>
+      <li>Message : {{message}}</li>
+   </ul>
+   <code>{{trace}}</code>
 
 
+@ControllerAdvice				Controller permettant de rediriger une exception vers une page d'erreur/fournir une erreur au client REST
+						Rq: par défaut, une exception est transformée en erreur 500 (= erreur du serveur)
+
+@ControllerAdvice
+public class ExceptionController {
+
+   //Redirection vers une page d'erreur
+   @ExceptionHandler
+   public ModelAndView handle(NotFoundException e){
+      ModelAndView mv = new ModelAndView("/error/404")
+         .addObject("status", 404)
+         .addObject("error", "Not found exception")
+         .addObject("trace", e.getStackTrace().toString())
+         .addObject("timestamp", new Date())
+         .addObject("message", e.getMessage());
+      mv.setStatus(HttpStatus.NOT_FOUND);
+      return mv;
+   }
+
+   //réponse d'erreur à la demande REST
+   @ExceptionHandler(NotFoundException.class)
+   public ResponseEntity<ErrorDto> handle(NotFoundException e){
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDto(e.getMessage()));
+   }
+
+   private class ErrorDto{
+      private final String message;
+      private final Date date = new Date();
+      public ErrorDto(String message) {
+         this.message = message;
+      }
+      public String getMessage() {
+         return message;
+      }
+      public Date getDate() {
+         return date;
+      }
+   }
+}
 
 
-
-
-
-
-
-
-
-
-
-
+-------------------------------------------Security
 
 
 
