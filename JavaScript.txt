@@ -1,0 +1,48 @@
+
+Une fonction peut être appellé avec un nombre variable d'arguments (+ ou - que le nombre normal défini dans la définition de la fonction)
+arguments = tableau contenant les arguments passés en paramètre lors de l'appel de la fonction.
+
+function maFonction(arg1, arg2) {
+   arguments.lenght;
+   arguments.forEach(function(arg) {
+      instruction(s);
+   });
+}
+
+
+accés à la valeur d'une propriété
+monObjet.maPropriete;
+monObjet['maPropriete'];
+
+modif de la valeur ou ajout d'une propriété à un objet si elle n'existe pas encore :
+monObjet.maPropriete = maValeur;
+monObjet['maPropriete'] = maValeur;
+
+supression d'une propriété d'un objet :
+delete monObjet['maPropriete'];
+
+
+définition d'une propriété avec toutes ses caractéristiques :
+maPropriete: { writable: true, configurable: true, enumerable: true, value: 'John' }
+writable = modifiable (false => constante)
+configuragle = accés (false => avec getter et setter)
+enumerable = scope (false => accés uniquement dans l'objet. equiv "private" en Java)
+
+
+
+monObjet.__proto = accés à l'objet prototype de monObjet
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
