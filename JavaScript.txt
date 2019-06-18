@@ -33,7 +33,93 @@ enumerable = scope (false => accés uniquement dans l'objet. equiv "private" en J
 monObjet.__proto = accés à l'objet prototype de monObjet
 
 
+document.getElementById('monId').onclick = maFonction;
+equiv à 
+	document.getElementById('monId').addEventListener('click', maFonction);
 
+
+
+//Redirection vers une autre page avec modification de l'URL dans le navigateur
+monElt.addEventListener('click', function() {
+   window.location = 'http://monurl.com';
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+==========================================================================Code pret :
+	fichier A
+//--------------- Requette HTTP asynchrone
+function sendAsynchronousGetRequest(url, callback) {
+    const req = new XMLHttpRequest();
+    req.onreadystatechange = function(event) {
+        // XMLHttpRequest.DONE === 4
+        if (this.readyState === XMLHttpRequest.DONE) {
+            if (this.status === 200) {
+                console.log("Réponse reçu: %s", this.responseText);
+                if(callback && typeof callback === 'function') {
+                    jsonResponse = JSON.parse(this.responseText);
+                    callback(jsonResponse);
+                }
+            } else {
+                console.log("Status de la réponse: %d (%s)", this.status, this.statusText);
+            }
+        }
+    };
+
+    if(!url instanceof URL) {
+        throw new Error('L\'URL n\'est pas valide');
+    }
+
+    req.open('GET', url.toString(), true);
+    req.send(null);
+}
+
+	fichier B
+var app = {
+    init: function() {
+        var url = new URL('https://api.github.com/users/AlexandreRamade');
+        try {
+            sendAsynchronousGetRequest(url, app.afficherProfilGitHub);
+        } catch (e) {
+            console.log(e);
+        }
+    },
+
+    afficherProfilGitHub: function(profileJson) {
+        var pseudoElt = document.createElement('h3');
+        pseudoElt.innerHTML = "Pseudo : " + profileJson.login;
+        
+        var nameElt = document.createElement('p');
+        nameElt.innerHTML = "Nom : " + profileJson.name;      
+
+        app.addEltToContainer(avatarElt, pseudoElt, nameElt);        
+    },
+
+    addEltToContainer: function() {
+        var containerElt = document.getElementById('container');
+        for(i = 0, lim = arguments.length; i < lim; i++) {
+            console.log(arguments[i]);
+            containerElt.appendChild(arguments[i]);
+        }
+    }
+}
+
+============================================================================================
 
 
 

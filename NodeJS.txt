@@ -1,0 +1,127 @@
+Principe :
+NodeJS permet d'utiliser JavaScript en dehors d'un navigateur Web.
+Comme Chrome, il se base sur V8 pour interpréter et optimiser le code JS.
+
+NPM est le gestionnaire de projet JavaScript (équiv de Maven et Gradle pour Java)
+
+
+Instalation :
+GitHub de Nodist : https://github.com/nullivex/nodist
+Nodist permet d'instaler plusieurs versions de Node.JS sur une même machine et de selectionner la version à utiliser.
+Pour instaler Nodist et NodeJS : https://github.com/nullivex/nodist/releases
+	> télécharger et exécuter .exe
+	> "node -v" et "npm -v" en ligne de commande pour vérifier que cela a bien fonctionné et que le variable Path a été MàJ
+
+
+
+
+
+ligne de commande
+node application.js	=> lance l'appli
+npm init -y		=> initialise le projet (création du fichier package.json)
+npm install monModule --save	=> télécharge la dépendance en local, cad dans le dossier node_modules du projet)
+npm install chai --save-dev	=> télécharge la dépendance en local en mode développeur
+npm install -g monModule	=> instaler la dépendance en global, cad dans Node et accessible par tous les projets
+npm uninstall -g monModule	=> désinstalation de la dépendance globale
+
+
+
+
+package.json		=> fichier de config (equi à POM.xml de Maven ou build.gradle de gradle) qui defini 
+				- nom (obligatoire)
+				- version (obligatoire)
+				- dépendances
+				- racourcits en ligne de commandes ("script": {})
+
+
+
+dossier node_modules	contient toutes les dépendances liées au projet et chargé par npm
+			ATTENTION : à ne pas chargé sur GitHub
+
+
+lors du lancement d'un fichier .js, Node place le contenu dans une fonction afin de préserver le global space name et de mettre à disposition 5 éléments accéssibles partout dans l'appli
+(function (exports, require, module, __filename, __dirname){
+   contenu du fichier.js original
+});
+
+exports		=> ref à module.exports
+require		=> permet de charger les modules (fichiers .js ou dépendances incluses dans node_modules)
+module		=> ref au module courant pour mettre à disposition l'élément module.export qui permet d'exporter des objets du fichier courant
+__filename	=> ref au fichier .js lui-même
+__dirname	=> ref au dossier courant lui-même
+
+
+var monObjet = require('monmodule')		importe le module contenu dans le dossier de dépendances node_modules
+var monObjet = require('./monFichier.js')	importe le fichier dans le même dossier
+var monObjet = require('../monFichier.js')	importe le fichier dans le dossier parent
+
+
+
+	fichierA.js
+exports.maVariable = monObjet;			=> exporte l'élément monObjet dans un fichier 'monmodule.js' dans le même dossier
+
+	FichierB.js
+var monObjet = require('./fichierA').monObjet;		=> récupération de monObjet dans un autre fichier (dans le même dossier)
+
+
+
+
+------------Dépendances
+
+npm install lodash --save	=> pratique
+
+const _ = require('lodash');
+
+function sayHello (name) {
+   if (_.isString(name) && !_.isEmpty(name)) {
+      console.log('Hello ' + name);
+   }
+}
+
+
+
+
+
+---------Tests unitaires
+Mocha gère les tests unitaires (equiv de JUnit en Java)
+ajouter la dépendance mocha au projet
+créer un dossier test
+les fichiers sont només : monFichier.spec.js
+
+mpn node_modules/.bin/mocha		=> lance les tests
+dans package.json
+"scripts": {
+   "test": "mocha"		=> lance les tests avec "mpn mocha"
+
+
+npm install chai --save-dev		=> permet d'ajouter des fonctionalités aux tests de base
+
+
+var expect = require('chai').expect;
+
+describe('Math.addition', function() {
+   describe('#without arguments', function() {
+      it('should return 0 when have no arguments', function() {
+         expect(function() {
+            math.addition()}).to.not.throw();
+         expect(math.addition()).to.equal(0);
+      });
+   });
+
+   describe('#agrgument is not a number', function() {
+      it('should ignore argument that is not a number', function() {
+         expect(function() {
+            math.addition(2, 4, 'notNumber')}).to.not.throw();
+         expect(math.addition(2, 4, 'notNumber')).to.equal(6);
+      });
+   });
+
+});
+
+
+
+
+
+
+
+
