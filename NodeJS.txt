@@ -58,10 +58,10 @@ var monObjet = require('../monFichier.js')	importe le fichier dans le dossier pa
 
 
 	fichierA.js
-exports.maVariable = monObjet;			=> exporte l'élément monObjet dans un fichier 'monmodule.js' dans le même dossier
+module.exports = monObjet;			=> exporte l'élément monObjet dans un fichier 'monmodule.js' dans le même dossier
 
 	FichierB.js
-var monObjet = require('./fichierA').monObjet;		=> récupération de monObjet dans un autre fichier (dans le même dossier)
+var monObjet = require('./fichierA');		=> récupération de monObjet dans un autre fichier (dans le même dossier)
 
 
 
@@ -117,6 +117,207 @@ describe('Math.addition', function() {
    });
 
 });
+
+
+
+
+
+____________________________ ES6 + ____________________________________
+
+var	pas utilisé
+cont	= constante, objet non mutable cad référence mémoire qui ne change pas, mais peut ajouter/suppr les propriétés dynamque comme avec une var
+let	= variable	for(let i = 0; i < 10; i++) {}
+
+`  `	equiv de '   ' pouvant contenir des EL sans avoir besoin de concaténer
+${   }
+
+
+(e => e + 1)	Arrow function : equiv des lambda en Java : fct annonyme plus facile et claire, NE CREE PAS DE NOUVEAU SCOPE !
+((e, f) => e + f)
+(e => ({prop1: val1, prop2: val2}))	retourne un objet
+(e => {
+   instruction(s);
+   return e;
+})
+
+
+...monObjet				= tableau
+
+function f (x, y = 2, z = 3) {		paramètres de fonctions avec des valeurs par défauts si non précisées lors de l'appel de la fct
+   return x + y + z;
+}
+
+function f (x, y, ...arr) {		un tableau contenant tous les paramètres au dela du second
+   return (x + y) * arr.length;
+}
+
+
+var params = ['hello', true, 7];
+var other = [1, 2, ...params];		clone les items du tableau params dans le tableau other
+	=> other = [1, 2, 'hello', true, 7]
+
+
+var monObjetA {
+   prop1: val1,
+   prop2: val2
+}
+
+var monObjetB {				clone les noms et valeurs des propriétés de l'objet A dans l'objet B
+   ...monObjetA,
+   prop3: val3
+}
+
+
+
+					equiv de monObjet = {x = x, y = y}
+var x = 1;
+var y = 2;
+
+monObjet = {
+   x,
+   y
+}
+
+
+
+					définir un nom de variable de manière dynamique
+function monCalcul(x, y) {
+   return x + y;
+}
+
+let monObjet = {		
+   prop1: val1,
+   ['prop' + monCalcul(1, 1)]: val2
+}
+
+
+					plus besoin de préciser maFonction: function(x, y) {
+monObjet = {
+   maFonction(x, y) {
+      instruction(s);
+   }
+
+
+
+
+					Destructuring
+var {prop1, prop5 = 'valDefaut', prop6} = maFctQuiRetourneUnObj();		ne récupére que les valeurs des props qui m'intéressent de l'objet
+										(si prop5 n'est pas trouvée dans l'objet, elle prendra la valeur 'valDefaut' par défaut)
+
+var {prop1: a, prop5: b, prop6: c} = maFctQuiRetourneUnObj();			récupère les valeur et les place dans des constantes pouvant être utilisées directement
+if(a > 5) {
+   ...
+}
+
+
+function([obj1, obj2]) {
+   console.log(obj1, obj2);
+}
+
+function({obj1, obj2}) {
+   console.log(obj1, obj2);
+}
+
+
+
+							export
+export function maFonction() {};
+export cst maConstante = 3;
+export monObjet;
+							import
+import * as maVariable from 'chemin/monFichier'
+import {monObjet, maFonction} from 'chemin/monFichier'
+
+
+
+
+							constructeur d'un objet
+class MonObjet {
+   constructor (id, x, y) {
+      this.id = id;
+      this.move(x, y);
+   }
+   move (x, y) {
+      this.x = x;
+      this.y = y;
+   }
+}
+
+class MonObjetB extends MonObjet {
+   constructor (id, x, y, z) {
+      super(id, x, y);
+      this.z = z;
+   }
+}
+
+
+
+------------- API Promises		=> permet les traitements asynchrones
+
+Promises = objet qui représente une valeur qui peut être disponible maintenant ou plus tard, ou jamais.
+
+on y attache des callback qui sont appeles en fonction du succés ou de l'échec de la réponse
+Etats des promises :
+ - pending = en attente
+ - fulfilled = tenue, succés
+ - rejected = rompue, erreur
+ - settled = acquitée, traitement terminé
+
+	=> 3 chemins possibles : pending / pending->fulfilled->settled / pendig->rejected->settled
+
+
+
+
+exemple général de déclaration d'une Promise
+.....
+.....
+.....
+
+
+
+
+
+					promises en concurences, si l'une des 3 est rejected, alors on passe dans .catch
+					Rq: on ne peut dans ce cas pas passer en argument de la promise suivante le return de la promise précédente
+Promise.all([
+   faireQqc(),
+   faireAutreChose(),
+   faireUnTroisiemeTruc()
+])
+   .then(()=>{})
+   .catch(e=>{});
+
+
+
+
+					idem, mais en passant les résultats des précédentes dans les suivantes
+async function toto() {
+   try {
+      let result = await faireQqc();
+      let newResult = await faireQqcAutre(result);
+      let finalResult = await faireUnTroisiemeTruc(newResult);
+      return finalResult;
+   } catch(error) {
+      failureCallback(error);
+   }
+}
+
+toto().then(finalResult => console.log(finalResult));		et récupération du résultat à l'extérieur de la fonction async
+
+
+
+
+
+					lancement de plusieurs callback en même temps et retourne la réponse quand les résultats sont tous récupérés
+async function add1(x) {
+   var a = resolveAfter2Seconds(20);
+   var b = resolveAfter2Seconds(30);
+   return x + await a + await b;
+}
+
+add1(10).then(v => {console.log(v);}); // affiche 60 après 2 secondes.
+
+
 
 
 
