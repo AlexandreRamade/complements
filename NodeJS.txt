@@ -20,7 +20,7 @@ ligne de commande
 node application.js	=> lance l'appli
 npm init -y		=> initialise le projet (création du fichier package.json)
 npm install monModule --save	=> télécharge la dépendance en local, cad dans le dossier node_modules du projet)
-npm install chai --save-dev	=> télécharge la dépendance en local en mode développeur
+npm install monModule --save-dev	=> télécharge la dépendance en local en mode développeur
 npm install -g monModule	=> instaler la dépendance en global, cad dans Node et accessible par tous les projets
 npm uninstall -g monModule	=> désinstalation de la dépendance globale
 
@@ -52,16 +52,16 @@ __dirname	=> ref au dossier courant lui-même
 
 
 var monObjet = require('monmodule')		importe le module contenu dans le dossier de dépendances node_modules
-var monObjet = require('./monFichier.js')	importe le fichier dans le même dossier
-var monObjet = require('../monFichier.js')	importe le fichier dans le dossier parent
+var monObjet = require('./monFichier.js')	importe les éléments déclarés module.exports = ... dans le fichier dans le même dossier
+var monObjet = require('../monFichier.js')	importe les éléments déclarés module.exports = ... dans le fichier dans le dossier parent
 
 
 
 	fichierA.js
-module.exports = monObjet;			=> exporte l'élément monObjet dans un fichier 'monmodule.js' dans le même dossier
+module.exports = monObjet;			=> rend l'objet monObjet accéssible (via un require('fichierA')) depuis un autre fichier JavaScript
 
-	FichierB.js
-var monObjet = require('./fichierA');		=> récupération de monObjet dans un autre fichier (dans le même dossier)
+	fichierB.js
+var monObjet = require('./fichierA');		=> récupération de monObjet dans un autre fichier (ici dans le même dossier)
 
 
 
@@ -268,12 +268,18 @@ Etats des promises :
 
 
 
-exemple général de déclaration d'une Promise
-.....
-.....
-.....
+					exemple général de déclaration d'une Promise
+const maPromise = new Promise( function(resolve, reject) {
+   if(true == true) {
+      resolve(monObjetResult);
+   } else {
+      reject();
+   }
+});
 
-
+maPromise
+   .then((monObjetResult) => {instruction(s) en cas de succés})	=> définit la fonction resolve
+   .catch(() => {instruction(s) en cas d'échec});	=> définit la fonction reject
 
 
 
@@ -289,7 +295,7 @@ Promise.all([
 
 
 
-
+					Avec async/await
 					idem, mais en passant les résultats des précédentes dans les suivantes
 async function toto() {
    try {

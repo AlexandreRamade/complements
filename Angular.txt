@@ -1,0 +1,44 @@
+SPA = Single Page Application
+	1 application = une seule page dont l'état varie en fonction des actions de l'utilisateur sans réappeler le serveur
+	modification de l'état de la page par JavaScript (DOM, css, ...)
+	Rq: l'URL est redéfinie en fonction de l'état de l'appli
+
+
+
+----------------------------------- TypeScript ---------------------------------------------
+extension .ts
+
+tsconfig.json		fichier qui définit les options de transpilation de TypeScript en JavaScript
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
