@@ -14,7 +14,7 @@ Pour instaler Nodist et NodeJS : https://github.com/nullivex/nodist/releases
 
 
 
-
+NPM = Node Package Manager
 
 ligne de commande
 node application.js	=> lance l'appli
@@ -326,6 +326,23 @@ add1(10).then(v => {console.log(v);}); // affiche 60 après 2 secondes.
 
 
 
+
+
+-----Fonction Générator
+voir : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Instructions/function*
+
+				fonctionne comme le mode debug
+function* monGenerator(i) {
+   instruction(s);
+   yield i + 1;
+   instruction(s);
+   yield i + 10;
+   return result;
+}
+
+var gen = monGenerator(10);	=> joue la fonction jusqu'au premier yield (gen.next().value() retourne 11)
+gen.next();			=> joue la fonction jusqu'au yield suivant (gen.next().value() retourne 20)
+gen.next();			=> joue la fonction jusqu'à la fin (gen.next().value() retourne result)
 
 
 
