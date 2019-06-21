@@ -19,7 +19,205 @@ tsconfig.json		fichier qui définit les options de transpilation de TypeScript en
 
 
 
+--------------------------------- Angular -------------------------------
 
+-----Angular-cli
+utilitaire en ligne de commande
+ - créer projet
+ - créer des composants, des services
+ - packaging de l'appli
+ - gestion des environnements
+ - tests (plus besoin d'instaler Mocha, ... comme en pur Node.JS)
+ - confort de dev (watch des fichiers et actualisation à chaque changement)
+=> architecture standardisée pour tous projets Angular (contrairement à AngularJS)
+
+
+
+
+{{}} 	=> interpolation
+
+						déclaration du composant en .ts
+						Rq: le constructeur doit être vide car il est généré automatiquement par Angular
+import { Component } from '@angular/core';
+
+@Component({
+   selector: 'monComposant',
+   templateUrl: './adresseFichier.html',
+   styleUrls: ['./adresseFichier.css']
+})
+export class MonComposant {
+   maProp1: 'valeur1';
+   constructor() {}
+}
+
+						fichier .html associé au composant
+<p>
+   {{maProp1}}
+</p>
+
+	ou
+<p [textContent]="name"></p>
+
+
+
+
+	[] 	=> binding de propriété
+
+
+A faire binding simple
+import { Component } from '@angular/core';
+
+@Component({
+   selector: 'monComposant',
+   templateUrl: './adresseFichier.html',
+   styleUrls: ['./adresseFichier.css']
+})
+export class MonComposant {
+   fontWeight:string = 'bold';
+   color:string = 'green';
+
+   constructor() {}
+}
+
+
+<p [style.color]="'red'">Mon texte en rouge</p>
+	ou
+<p [ngStyle]="{'color': 'red'}">Mon texte en rouge</p>
+
+
+<div [ngStyle]="{'fontWeight': fontWeight, 'color': color}">Texte en gras et vert</p>
+
+
+=============> ajout ngClass (p 22)
+
+
+
+							création d'une nouvelle balise
+import { Component } from '@angular/core';
+
+export interface hasName {
+   name:string;
+}
+
+@Component({
+   selector: 'monComposant',
+   templateUrl: './adresseFichier.html',
+   styleUrls: ['./adresseFichier.css']
+})
+export class MonComposant {
+   getUser():hasName {
+      return {name:'Nom';};
+   }
+   
+   constructor() {}
+}
+
+<monComposant [user]="getUser()"></monComposant>
+
+
+
+
+
+	[()]	=> 2 way data binding
+
+
+
+
+
+
+
+
+	() 	=> binding d’e´ve´nement
+
+import { Component } from '@angular/core';
+
+@Component({
+   selector: 'monComposant',
+   templateUrl: './adresseFichier.html',
+   styleUrls: ['./adresseFichier.css']
+})
+export class MonComposant {
+   onClick(event):void {
+      console.log('onClick', event);
+   
+   constructor() {}
+}
+
+								$event obligatoire pour déclarer l'évenement
+<div>
+   <button (click)="onClick($event)">Click me</button>
+</div>
+
+
+
+
+
+
+	# 	=> de´claration de variable 
+
+<input type="text" #monInput placeholder="Saisir une valeur">
+
+<div>La valeur de l'input est : {{monInput.value}}</div>
+
+
+
+	* 	=> directives structurelles
+import { Component } from '@angular/core';
+
+@Component({
+   selector: 'monComposant',
+   templateUrl: './adresseFichier.html',
+   styleUrls: ['./adresseFichier.css']
+})
+export class MonComposant {
+   maProp1:string = 'valeur1';
+
+   skills:Array<string> = ['str1', 'str2', 'str3'];
+
+   constructor() {}
+}
+
+
+<!-- if -->
+<div *ngIf="maProp1.length !== 0">
+   <p>Propriété1 : {{maProp1}}</p>
+</div>
+
+<!-- for -->
+<ul>
+   <li *ngFor="let skill of skills ; index as i">
+      {{i}} - {{skill}}
+   </li>
+</ul>
+
+<!-- switch/case -->
+<div [ngSwitch]="maProp1.length">
+   <p *ngSwitchCase="0">Prop1 is empty</p>
+   <p *ngSwitchCase="1">Prop1 as one character</p>
+   <p *ngSwitchDefault>Prop1 has many characters</p>
+</div>
+
+
+
+
+
+
+	?	=> paramètre optionnel
+
+import { Component } from '@angular/core';
+
+@Component({
+   selector: 'monComposant',
+   templateUrl: './adresseFichier.html',
+   styleUrls: ['./adresseFichier.css']
+})
+export class MonComposant {
+   maProp1: 'valeur1';
+   constructor() {}
+}
+
+						tant que maProp2 est undefined, <p></p> est créé mais n'a pas de contenu sans lever d'erreur
+<p [textContent]="user?.maProp2"></p>
 
 
 
