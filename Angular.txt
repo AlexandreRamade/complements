@@ -1,0 +1,172 @@
+
+---------Pipe personnalisé
+ng generate pipe
+
+
+Exemple de pipe perso qui affiche la 1re lettre de chaque mot en majuscule :
+import { Pipe, PipeTransform } from '@angular/core';
+import * as _ from 'lodash';
+
+/**
+ * Display the string element with the first letter of each word in uppercase
+ * Usage:
+ *  value | inTitleCase
+ * Exemple:
+ *  {{ 'my title' | inTitleCase}}
+ *  Display: My Title
+ */
+
+@Pipe({
+  name: 'inTitleCase'
+})
+export class InTitleCasePipe implements PipeTransform {
+
+  transform(value: string, args?:any): string {			=> args récupère les param facultatifs : | inTitleCase: 5, 6 }}
+    let words:Array<String> = _.split(value, ' ');
+    let txt:string = '';
+    for(let word:string of words) {
+      txt += _.upperFirst(word) + ' ';
+    }
+    return txt;
+  }
+}
+
+utilisation dans le fichier HTML :
+<p>{{MonObjet.title | inTitleCase }}</p>
+
+
+------ Directive
+
+ng generate directive
+
+
+import { Directive, ElementRef, Renderer2 } from '@angular/core';
+
+@Directive({
+  selector: '[appHighlight]'
+})
+export class HighlightDirective {
+
+  constructor(el: ElementRef, renderer: Renderer2) {
+    renderer.setStyle(el.nativeElement, 'color', 'green');
+    renderer.setStyle(el.nativeElement, 'text-decoration', 'underline');
+  }
+}
+
+
+utilisation dans le fichier HTML :
+<p appHighlight>Mon texte décoré</p>
+
+
+
+----------ViewChild
+
+fichier HTML composant parent :
+<div>
+   <app-mon-composant-enfant #enfant></app-mon-composant-enfant>
+</div>
+
+
+fichier .ts composant parent :
+@ViewChild('enfant', {static: false})
+monEnfant:MonComposantEnfant;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+____________________Programation réative_____________________________________
+site ReactiveX		permet de créer un projet en prog réactive pour plusieurs langages
+
+RxJS	en ES6
+
+But vis-à-vis des fonctions : avoir uniquement des Pures Fonctions, cad des fonctions qui ne dépendent pas d'un paramètre/argument en dehors de leur corps
+=> faible couplage, plus facile d'entretient, plus de lisibilité, ...
+
+
+							création d'un suscriber
+							Rq: hot observable qui n'a pas de complite() qui le termine
+								cold observable a un complite() qui le termine
+							Rq: par convention on sufixe une variable observable avec $
+const observable$ = new Observable(suscriber => {
+   suscriber.next(1);
+   suscriber.next(2);
+   setTimout(() => {
+      suscriber.next(3);
+      suscriber.complite();
+   }, 1000);
+}
+
+						s'abonne au éléments retournés par l'observable et leur applique un traitement
+						ATTENTION : lorsque le traitement est terminé, il faut se désinscrire pour ne pas avoir de fuite de mémoire !
+	
+observable.subscribe({
+  next(x) { console.log('got value ' + x); },
+  error(err) { console.error('something wrong occurred: ' + err); },
+  complete() { console.log('done'); }
+});
+
+
+
+Exemple d'un hot observable :
+import { fromEvent } from 'rxjs';		=> fromEvent permet la création d'un observable
+
+monObservable$:Observable = fromEvent(document, 'click').suscribe(() => console.log('Clicked on the page');
+
+
+
+	pipe(   )		permet de chainer des opérations à l'intérieur avant l'appel du suscribe
+
+import { fromEvent } from 'rxjs';
+import { scan } from 'rxjs/operators';
+
+monObservable$:Observable = fromEvent(document, 'click')
+   .pipe(scan(count => count +1, 0))
+   .suscribe(count => console.log(`Clicked ${count} fois`));
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
