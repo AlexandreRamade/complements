@@ -74,6 +74,68 @@ monEnfant:MonComposantEnfant;
 
 
 
+-----------Injection de dépendance
+
+dans app.module.ts
+providers: []	liste les providers, cad les classes services qui vont gérer l'injection dans les composants
+		=> ces classes alors sont des singletons
+
+
+			déclaration du provider (= classe service)
+			ATTENTION : nécéssite de déclarer le provider dans app.module.ts manuellement 
+@Injectable()
+export default class MonProvider {
+   ...
+}
+
+			déclaration du provider sans avoir besoin de le déclarer manuellement dans app.module.ts
+			Rq: 'root' => provider accessible dans toute l'appli. Possibilité d'utiliser 'MonModule' pour y avoir accés uniquement dans le module indiqué et ses sous-modules
+@Injectable({
+   provideIn: 'root'
+})
+export default class MonProvider {
+   ...
+}
+
+
+			injection dans un composant
+
+construcor(private api:MonProvider) {}
+
+
+
+
+
+---------------- Appel réseaux
+
+dans app.module.ts
+   imports: [
+      HttpClientModule
+   ],
+
+
+@Injectable()
+export class MonHttpService {
+   constructor(private http: HttpClient) {}
+
+   getUser(login:string) {
+      return this.http.get(`${API_BASE_URL}${API_USERS}${login}`);
+   }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

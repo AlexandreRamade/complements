@@ -269,7 +269,7 @@ Etats des promises :
 
 
 					exemple général de déclaration d'une Promise
-const maPromise = new Promise( function(resolve, reject) {
+const maPromise = new Promise((resolve, reject) => {
    if(true == true) {
       resolve(monObjetResult);
    } else {
@@ -278,8 +278,8 @@ const maPromise = new Promise( function(resolve, reject) {
 });
 
 maPromise
-   .then((monObjetResult) => {instruction(s) en cas de succés})	=> définit la fonction resolve
-   .catch(() => {instruction(s) en cas d'échec});	=> définit la fonction reject
+   .then((monObjetResult) => {instruction(s) en cas de succés})		=> définit la fonction resolve
+   .catch(() => {instruction(s) en cas d'échec});			=> définit la fonction reject
 
 
 
