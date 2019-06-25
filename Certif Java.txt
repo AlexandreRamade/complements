@@ -7,6 +7,20 @@ Date
 
 
 
+
+
+
+
+------------------Initialisation
+{1, 2, 3} ne peut servir que lors d'une initialisation de variable !
+
+
+
+------------------Array
+
+ArrayList utilise un tableau. Par défaut, ce tableau à une taille de 10.
+
+
 -------------Exception et RuntimeException
 
 RuntimeException hérite de Exception
