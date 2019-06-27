@@ -157,12 +157,12 @@ var other = [1, 2, ...params];		clone les items du tableau params dans le tablea
 	=> other = [1, 2, 'hello', true, 7]
 
 
-var monObjetA {
+var monObjetA = {
    prop1: val1,
    prop2: val2
 }
 
-var monObjetB {				clone les noms et valeurs des propriétés de l'objet A dans l'objet B
+var monObjetB = {				clone les noms et valeurs des propriétés de l'objet A dans l'objet B
    ...monObjetA,
    prop3: val3
 }
