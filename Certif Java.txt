@@ -1,12 +1,27 @@
 -------------A tester
 cast nombres (int -> long / long -> int / ...)
 
-Qu'accepte Switch-case comme type de variable et comme modifier de variable (statis, ...)
+
 
 Date
 
 
 
+
+
+-----------------switch/case
+int and Integer 
+short and Short
+byte and Byte 
+
+String 
+char and Character 
+
+enum values 
+
+	X long car ne peut les transformer en int
+	X float, double		imprécis
+	X boolean
 
 
 
@@ -21,19 +36,29 @@ Date
 ArrayList utilise un tableau. Par défaut, ce tableau à une taille de 10.
 
 
+
+---------------Héritage
+
+redéfinition de méthode : private -> defaut (package) -> protected -> public
+
+Dabord static{   }, puis {  }, puis constructeur de la classe mère puis de la classe fille
+
+
+
+
 -------------Exception et RuntimeException
 
 RuntimeException hérite de Exception
 
-RuntimeException = exception levée lors du traitement et pouvant être capturée, crash le prog sinon.
+RuntimeException = Unchecked Exception = exception levée lors du traitement et pouvant être capturée, crash le prog sinon.
 
 Exception = exception levée au moment de la compilation et qui arrète la compilation.
 
 
 
-Les Exception doivent être toujours renvoyées au niveau suivant
+Les Exception = Checked Exception doivent être toujours renvoyées au niveau suivant
 
-Les RuntimeException sont transmise à l'élément parent automatiquement jusqu'à ce qu'elles soient capturées.
+Les RuntimeException = Unchecked Exception sont transmise à l'élément parent automatiquement jusqu'à ce qu'elles soient capturées.
 
 Exemple :
 void maMethodeExc() throws Exception {
