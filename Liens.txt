@@ -1,0 +1,7 @@
+https://github.com/bewizyu-formation/2019-D09-TiPunch-private-showcase-back
+https://github.com/bewizyu-formation/2019-D09-TiPunch-private-showcase-front/branches
+https://github.com/bewizyu/project-private-showcase-assets
+
+https://travis-ci.com/bewizyu-formation
+https://sonarcloud.io/organizations/bewizyu-formation/projects
+https://trello.com/b/umPxgGsN/private-showcase
