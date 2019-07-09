@@ -1,13 +1,3 @@
--------------A tester
-cast nombres (int -> long / long -> int / ...)
-
-
-
-Date
-
-
-
-
 
 -----------------switch/case
 int and Integer 
@@ -24,6 +14,37 @@ enum values
 	X boolean
 
 
+---------------StringBuilder
+sb.append(char[], firstIndexInclus, nbDeCharAjoutés);
+sb.append("maString", firstIndexInclus, lastIdexExclus);
+sb.charAt(index);
+
+sb.deleteCharAt(index);
+sb.delete(startIndex, lastIndexExclus);
+
+sb.insert(index, char[]/string);
+
+sb.replace(firstIndex, lastIndexExclus, char[]/str);
+	supprime les char entre les index first et last exclu, et remplace par toute la string (même si plus longue)
+	si lastIndexExclus plus grnad que la chaine de base => supprime les char jusqu'à la fin et remplace par la nouvelle chaine
+	si firstIndex = lastIndexExclus alors insertion à cet index de la chaine
+
+String substring = sb.subString(firstIndex, lastIndexExlus);
+	ne modifie pas l'objet sb lui-même !
+
+
+
+------------java.util.Date
+Date()
+Date(year, month, date)
+Date(year, month, date, hrs, min, sec)
+Date(long)	long=timestamp=nbs milisec depuis 01/01/70 00:00:00
+
+
+date.after(otherDate)	=> true ou false
+date.before(otherDate)
+
+date.getTime()		=> retourne long timestamp
 
 
 ------------------Initialisation
