@@ -1,0 +1,59 @@
+Didier Ambroise		Manager		SMACL
+
+Milad ARDEHALI		Lead Dev	MACIF	milad.ardehali@neo-soft.fr
+Luc			Dev
+Aurore			Dev (junior il y a 1 an)
+
+Vincent BROSSARD	comercial
+
+Création : Rennes en 2005		par Soig LE BRUCHEC (PDG)
+			63 M€ en 2017
+
+14 implantations => 1 150 personnes		recrute 450 collab en 2019
+
+
+4 filiales
+	- Neo-soft Solutions	=> Solutions métiers (data, appli desktop et mobile)
+				   Omnicanal (e-commerce, marketplace)
+				   (Lille)
+	- Cogital by Neo-soft	=> sécurité info
+	- Fit Retail		=> expertise et accompagnement de la digitalisation
+				   (Rennes, Paris, Lille)
+	- ProxIt by Neo-soft	=> gestion de l'évolution des infrastructures technique
+				   (Paris, 50 consultants)
+
+Valeurs clés :
+ - Proximité		absence de clause de mobilité
+ - Accompagnement	intégration et suivi personalisé
+ - Croissance		offre diversifiée, implantation nationnale et internationnale
+ - Technologie		formation continue, participations évenements technologiques
+ - Engagement		PACTE = respect des valeurs de l'entreprise par les managers
+				prestation de qualité des collaborateurs chez les clients
+					(adaptabilité, profesionnalisme)
+2 modes de W dans ESN :
+ - placé chez un client et w chez lui
+ - réalisation d'un produit numérique pour un client
+
+
+Labels :
+ - RSE		prise en compte des attentes des collaborateurs, politique environnementale, éthique des affaires, achats responsables…
+
+
+Domaines d'expertise :
+ - Conseil et gestion de projet
+ - domaine applicatif
+ - infrastructures et réseaux
+ - cybersécurité
+
+
+Ingénieur en développement Java (H/F) 
+    Les phases d'analyse et de conception d’applications métiers
+    La rédaction des spécifications techniques et fonctionnelles
+    La prise en charge du développement de différents modules logiciels en Java/J2EE
+    Réalisation d’évolutions sur les applicatifs existants
+    Les phases de test et de recette
+    Maintenance évolutive et corrective
+    Participer aux orientations techniques,
+
+
+
